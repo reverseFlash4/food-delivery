@@ -1,5 +1,6 @@
 package com.fooddelivery.service;
 
+import com.fooddelivery.constants.AppConstants;
 import com.fooddelivery.dto.request.PlaceOrderRequest;
 import com.fooddelivery.dto.response.OrderResponse;
 import com.fooddelivery.dto.response.PageResponse;
@@ -133,7 +134,7 @@ public class OrderService {
                 .amount(total)
                 .status(PaymentStatus.COMPLETED)
                 .paymentMethod(req.getPaymentMethod())
-                .transactionId("TXN-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase())
+                .transactionId(AppConstants.TRANSACTION_ID_PREFIX + UUID.randomUUID().toString().substring(0, 8).toUpperCase())
                 .processedAt(LocalDateTime.now())
                 .build();
         paymentRepository.save(payment);
@@ -142,10 +143,8 @@ public class OrderService {
         recordStatusHistory(order, null, OrderStatus.PLACED, "Order placed", customer);
 
         final Order savedOrder = order;
-        // Event fires after commit — safe even if notification delivery fails
         eventPublisher.publishEvent(new OrderPlacedEvent(this,
-                savedOrder.getId(), savedOrder.getOrderNumber(),
-                customer.getEmail(), restaurant.getName()));
+                savedOrder.getOrderNumber(), customer.getEmail(), restaurant.getName()));
 
         return OrderResponse.from(savedOrder);
     }
@@ -161,7 +160,7 @@ public class OrderService {
                 .orElseThrow(() -> new ResourceNotFoundException("Order", orderId));
 
         if (!order.getRestaurant().getOwner().getId().equals(ownerId)) {
-            throw new AppException("Access denied", HttpStatus.FORBIDDEN);
+            throw new AppException(AppConstants.ACCESS_DENIED, HttpStatus.FORBIDDEN);
         }
 
         OrderStatus current = order.getStatus();
@@ -176,8 +175,6 @@ public class OrderService {
         } else if (newStatus == OrderStatus.REJECTED) {
             order.setRejectionReason(note);
             restoreStock(order);
-        } else if (newStatus == OrderStatus.PREPARING) {
-            // Already accepted
         } else if (newStatus == OrderStatus.READY_FOR_PICKUP) {
             order.setPreparedAt(LocalDateTime.now());
         }
@@ -200,7 +197,7 @@ public class OrderService {
                 .orElseThrow(() -> new ResourceNotFoundException("Order", orderId));
 
         DeliveryPartner partner = partnerRepository.findByUserId(partnerUserId)
-                .orElseThrow(() -> new AppException("Delivery partner profile not found", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new AppException(AppConstants.PARTNER_NOT_FOUND, HttpStatus.NOT_FOUND));
 
         if (order.getDeliveryPartner() == null || !order.getDeliveryPartner().getId().equals(partner.getId())) {
             throw new AppException("This order is not assigned to you", HttpStatus.FORBIDDEN);
@@ -235,7 +232,7 @@ public class OrderService {
                 .orElseThrow(() -> new ResourceNotFoundException("Order", orderId));
 
         if (!order.getCustomer().getId().equals(customerId)) {
-            throw new AppException("Access denied", HttpStatus.FORBIDDEN);
+            throw new AppException(AppConstants.ACCESS_DENIED, HttpStatus.FORBIDDEN);
         }
         if (order.getStatus() != OrderStatus.PLACED) {
             throw new InvalidOrderStateException("Orders can only be cancelled when in PLACED status");
@@ -337,7 +334,7 @@ public class OrderService {
         String partnerEmail = order.getDeliveryPartner() != null
                 ? order.getDeliveryPartner().getUser().getEmail() : null;
         eventPublisher.publishEvent(new OrderStatusChangedEvent(this,
-                order.getId(), order.getOrderNumber(), old, newStatus,
+                order.getOrderNumber(), old, newStatus,
                 order.getCustomer().getEmail(),
                 order.getRestaurant().getOwner().getEmail(),
                 partnerEmail));
@@ -374,6 +371,6 @@ public class OrderService {
     }
 
     private String generateOrderNumber() {
-        return "ORD-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+        return AppConstants.ORDER_NUMBER_PREFIX + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
     }
 }

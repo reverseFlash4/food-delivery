@@ -1,5 +1,6 @@
 package com.fooddelivery.service;
 
+import com.fooddelivery.constants.AppConstants;
 import com.fooddelivery.dto.request.CreateDeliveryPartnerRequest;
 import com.fooddelivery.dto.response.DeliveryPartnerResponse;
 import com.fooddelivery.dto.response.OrderResponse;
@@ -94,6 +95,6 @@ public class DeliveryPartnerService {
 
     DeliveryPartner getPartnerByUserId(Long userId) {
         return partnerRepository.findByUserId(userId)
-                .orElseThrow(() -> new AppException("Delivery partner profile not found", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new AppException(AppConstants.PARTNER_NOT_FOUND, HttpStatus.NOT_FOUND));
     }
 }

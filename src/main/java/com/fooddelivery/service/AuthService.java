@@ -1,5 +1,6 @@
 package com.fooddelivery.service;
 
+import com.fooddelivery.constants.AppConstants;
 import com.fooddelivery.dto.request.LoginRequest;
 import com.fooddelivery.dto.request.RegisterRequest;
 import com.fooddelivery.dto.response.AuthResponse;
@@ -59,7 +60,7 @@ public class AuthService {
         UserPrincipal principal = (UserPrincipal) auth.getPrincipal();
         return AuthResponse.builder()
                 .token(token)
-                .tokenType("Bearer")
+                .tokenType(AppConstants.BEARER_TYPE)
                 .userId(principal.getId())
                 .name(user.getName())
                 .email(user.getEmail())
@@ -77,7 +78,7 @@ public class AuthService {
         User user = userRepository.findById(principal.getId()).orElseThrow();
         return AuthResponse.builder()
                 .token(token)
-                .tokenType("Bearer")
+                .tokenType(AppConstants.BEARER_TYPE)
                 .userId(principal.getId())
                 .name(user.getName())
                 .email(user.getEmail())

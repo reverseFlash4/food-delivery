@@ -1,5 +1,6 @@
 package com.fooddelivery.service;
 
+import com.fooddelivery.constants.AppConstants;
 import com.fooddelivery.dto.request.CreateRestaurantRequest;
 import com.fooddelivery.dto.response.PageResponse;
 import com.fooddelivery.dto.response.RestaurantResponse;
@@ -102,7 +103,7 @@ public class RestaurantService {
     }
 
     @Transactional
-    public void deactivateRestaurant(Long restaurantId, Long adminId) {
+    public void deactivateRestaurant(Long restaurantId) {
         Restaurant restaurant = restaurantRepository.findById(restaurantId)
                 .orElseThrow(() -> new ResourceNotFoundException("Restaurant", restaurantId));
         restaurant.setActive(false);
@@ -114,6 +115,6 @@ public class RestaurantService {
         User owner = userRepository.findById(ownerId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", ownerId));
         return restaurantRepository.findByIdAndOwner(restaurantId, owner)
-                .orElseThrow(() -> new AppException("Restaurant not found or access denied", HttpStatus.FORBIDDEN));
+                .orElseThrow(() -> new AppException(AppConstants.RESTAURANT_ACCESS_DENIED, HttpStatus.FORBIDDEN));
     }
 }

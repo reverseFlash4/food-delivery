@@ -30,8 +30,4 @@ public class NotificationService {
         }
     }
 
-    public void notifyPartnerAssigned(String partnerEmail, String orderNumber) {
-        log.info("[NOTIFY][PARTNER] You have been assigned order {} — sent to {}",
-                orderNumber, partnerEmail);
-    }
 }

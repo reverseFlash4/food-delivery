@@ -98,10 +98,8 @@ public class RestaurantController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<Void>> deactivateRestaurant(
-            @PathVariable Long id,
-            @AuthenticationPrincipal UserPrincipal principal) {
-        restaurantService.deactivateRestaurant(id, principal.getId());
+    public ResponseEntity<ApiResponse<Void>> deactivateRestaurant(@PathVariable Long id) {
+        restaurantService.deactivateRestaurant(id);
         return ResponseEntity.ok(ApiResponse.success("Restaurant deactivated", null));
     }
 }

@@ -1,5 +1,6 @@
 package com.fooddelivery.service;
 
+import com.fooddelivery.constants.AppConstants;
 import com.fooddelivery.dto.request.MenuItemRequest;
 import com.fooddelivery.dto.response.MenuItemResponse;
 import com.fooddelivery.exception.AppException;
@@ -87,6 +88,6 @@ public class MenuService {
         User owner = userRepository.findById(ownerId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", ownerId));
         return restaurantRepository.findByIdAndOwner(restaurantId, owner)
-                .orElseThrow(() -> new AppException("Restaurant not found or access denied", HttpStatus.FORBIDDEN));
+                .orElseThrow(() -> new AppException(AppConstants.RESTAURANT_ACCESS_DENIED, HttpStatus.FORBIDDEN));
     }
 }
